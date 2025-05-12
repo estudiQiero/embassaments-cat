@@ -1,42 +1,95 @@
 <!DOCTYPE html>
 <html lang="ca">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Embassaments de Catalunya - Conques Internes</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Embassaments de Catalunya - Conques Internes</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <header>
+      <!-- Titulars -->
+      <section>
+        <h1>Estat dels embassaments de Catalunya - Conques Internes</h1>
+        <p>
+          Consulta l'estat actual dels embassaments de Catalunya i la seva
+          evolució al llarg del temps.
+        </p>
+        <div id="grupCaps-1">
+          <p>Informació elemental de les conques Internes</p>
+          <div class="capsula">
+            <p>Data</p>
+          </div>
+          <div class="capsula">
+            <p>Percentatge mitjà d'ompliment</p>
+          </div>
+          <div class="capsula">
+            <p>Volum total embassat</p>
+          </div>
+        </div>
+        <div id="grup-Caps-2">
+          <p>Comparació respecte a...</p>
+          <div class="capsula">
+            <p>Ahir</p>
+          </div>
+          <div class="capsula">
+            <p>Fa 7 dies</p>
+          </div>
+          <div class="capsula">
+            <p>Fa 30 dies</p>
+          </div>
+        </div>
+      </section>
+      <!-- Gràfica general -->
+      <section>
+        <div>
+          <img src="public/img/reloj-general.svg" alt="" sizes="" srcset="" />
+        </div>
+      </section>
+    </header>
+    <main>
+      <section class="resum-grafica">
+        <div id="resum">Carregant resum...</div>
+        <div id="grafica">
+          <canvas id="velocimetre"></canvas>
+        </div>
+      </section>
 
-</head>
-<body>
-  <h1>Estat dels embassaments de Catalunya - Conques Internes</h1>
+      <div id="embassaments">Carregant dades...</div>
 
-  <section class="resum-grafica">
-    <div id="resum">Carregant resum...</div>
-    <div id="grafica">
-      <canvas id="velocimetre"></canvas>
-    </div>
-  </section>
+      <section class="explicacio-dades">
+        <h2>Com interpretar les dades dels embassaments</h2>
+        <ul>
+          <li>
+            <strong>Nivell absolut:</strong> És l'altitud de la superfície de
+            l'aigua respecte al nivell del mar. Es mesura en metres (m). No
+            indica la profunditat, sinó l'alçada a la que es troba l'aigua dins
+            de l'embassament.
+          </li>
+          <li>
+            <strong>Volum embassat:</strong> Representa el total d'aigua
+            acumulada dins de l'embassament. S'expressa en hectòmetres cúbics
+            (hm³), on 1 hm³ equival a 1 milió de metres cúbics d'aigua.
+          </li>
+          <li>
+            <strong>Percentatge de volum embassat:</strong> Indica el
+            percentatge de la capacitat total de l'embassament que està
+            actualment plena. És un indicador ràpid de com d'omplert està
+            l'embassament.
+          </li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      <div class="footer">
+        Dades obertes proporcionades per
+        <a href="https://analisi.transparenciacatalunya.cat/" target="_blank">
+          transparenciacatalunya.cat
+        </a>
+      </div>
+    </footer>
 
-  <div id="embassaments">Carregant dades...</div>
-
-  <section class="explicacio-dades">
-    <h2>Com interpretar les dades dels embassaments</h2>
-    <ul>
-      <li><strong>Nivell absolut:</strong> És l'altitud de la superfície de l'aigua respecte al nivell del mar. Es mesura en metres (m). No indica la profunditat, sinó l'alçada a la que es troba l'aigua dins de l'embassament.</li>
-      <li><strong>Volum embassat:</strong> Representa el total d'aigua acumulada dins de l'embassament. S'expressa en hectòmetres cúbics (hm³), on 1 hm³ equival a 1 milió de metres cúbics d'aigua.</li>
-      <li><strong>Percentatge de volum embassat:</strong> Indica el percentatge de la capacitat total de l'embassament que està actualment plena. És un indicador ràpid de com d'omplert està l'embassament.</li>
-    </ul>
-  </section>
-  
-
-  <div class="footer">
-    Dades obertes proporcionades per
-    <a href="https://analisi.transparenciacatalunya.cat/" target="_blank">
-      transparenciacatalunya.cat
-    </a>
-  </div>
-
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
