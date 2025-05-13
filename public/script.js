@@ -55,9 +55,9 @@ const imatgesEmbassaments = {
       const resposta = await fetch('/api/embassaments');
       const dades = await resposta.json();
   
-      const container = document.getElementById('embassaments');
+      const container = document.getElementById('capsules-capselera');
       const resumContainer = document.getElementById('resum');
-      const graficaContainer = document.getElementById('grafica');
+      const graficaContainer = document.getElementById('velocimetre');
   
       container.innerHTML = '';
       resumContainer.innerHTML = '';

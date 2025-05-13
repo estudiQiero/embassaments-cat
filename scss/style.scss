@@ -1,0 +1,12 @@
+/* ==========================================================================
+   Full d'estils principal - style.scss
+   ==========================================================================
+   Autor: Miq [La Pera Llimonera]
+   Data de creació: 12/05/2025
+   Versió: 0.2
+   Descripció: Arxiu principal SCSS que compila tots els estils del projecte.
+               Inclou reset de base i estils modulars.
+   ========================================================================== */
+
+@use 'reset';
+@use 'main';

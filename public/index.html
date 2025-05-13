@@ -10,39 +10,47 @@
   <body>
     <header>
       <!-- Titulars -->
-      <section>
+      <section id="dades-elementals">
         <h1>Estat dels embassaments de Catalunya - Conques Internes</h1>
         <p>
           Consulta l'estat actual dels embassaments de Catalunya i la seva
           evolució al llarg del temps.
         </p>
-        <div id="grupCaps-1">
-          <p>Informació elemental de les conques Internes</p>
-          <div class="capsula">
-            <p>Data</p>
+        <div id="capsules-capselera">
+          <div id="grupCaps-1">
+            <p>Informació elemental de les conques Internes</p>
+            <div class="capsula">
+              <p>Data</p>
+              <h6 id="ultima-data">--</h6>
+            </div>
+            <div class="capsula">
+              <p>Percentatge mitjà d'ompliment</p>
+              <h6 id="percentatge-mitja">--</h6>
+            </div>
+            <div class="capsula">
+              <p>Volum total embassat</p>
+              <h6 id="volum-total">--</h6>
+            </div>
           </div>
-          <div class="capsula">
-            <p>Percentatge mitjà d'ompliment</p>
-          </div>
-          <div class="capsula">
-            <p>Volum total embassat</p>
-          </div>
-        </div>
-        <div id="grup-Caps-2">
-          <p>Comparació respecte a...</p>
-          <div class="capsula">
-            <p>Ahir</p>
-          </div>
-          <div class="capsula">
-            <p>Fa 7 dies</p>
-          </div>
-          <div class="capsula">
-            <p>Fa 30 dies</p>
+          <div id="grup-Caps-2">
+            <p>Comparació respecte a...</p>
+            <div class="capsula">
+              <p>Ahir</p>
+              <h6 id="dif-1dia">--</h6>
+            </div>
+            <div class="capsula">
+              <p>Fa 7 dies</p>
+              <h6 id="dif-7dies">--</h6>
+            </div>
+            <div class="capsula">
+              <p>Fa 30 dies</p>
+              <h6 id="dif-30dies">--</h6>
+            </div>
           </div>
         </div>
       </section>
       <!-- Gràfica general -->
-      <section>
+      <section id="velocimetre">
         <div>
           <img src="public/img/reloj-general.svg" alt="" sizes="" srcset="" />
         </div>
@@ -52,7 +60,7 @@
       <section class="resum-grafica">
         <div id="resum">Carregant resum...</div>
         <div id="grafica">
-          <canvas id="velocimetre"></canvas>
+          <canvas id="velocimetre-nou"></canvas>
         </div>
       </section>
 
@@ -90,6 +98,6 @@
       </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="info-embassaments.js"></script>
   </body>
 </html>
