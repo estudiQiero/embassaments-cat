@@ -1,0 +1,45 @@
+---
+import NivellBar from './NivellBar.astro';
+
+const { embassament } = Astro.props;
+const [nom, zona] = embassament.estaci.replace('Embassament de ', '').replace('Embassament ', '').split(' (');
+const zonaNeta = zona ? zona.replace(')', '') : '';
+---
+<article class="card">
+  <NivellBar percentatge={embassament.percentatge} />
+  <div class="info">
+    <h3>{nom}</h3>
+    {zonaNeta && <p class="zona">{zonaNeta}</p>}
+    <dl>
+      <div>
+        <dt>Nivell absolut</dt>
+        <dd class="mono">{embassament.nivellAbsolut !== null ? `${embassament.nivellAbsolut} m` : 'No disponible'}</dd>
+      </div>
+      <div>
+        <dt>Volum embassat</dt>
+        <dd class="mono">{embassament.volum !== null ? `${embassament.volum.toFixed(2)} hm³` : 'No disponible'}</dd>
+      </div>
+    </dl>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: var(--surface-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  h3 { font-size: 1.05rem; }
+  .zona {
+    margin: 2px 0 10px;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+  dl { margin: 0; display: grid; gap: 4px; }
+  dl div { display: flex; justify-content: space-between; gap: 12px; }
+  dt { font-size: 0.72rem; color: var(--ink-soft); font-weight: 400; }
+  dd { margin: 0; font-size: 0.82rem; }
+</style>

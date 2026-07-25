@@ -1,20 +1,16 @@
 {
   "name": "embassaments-cat",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "2.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sync": "node scripts/sync-local.mjs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "description": "",
   "dependencies": {
-    "axios": "^1.8.4",
-    "cheerio": "^1.0.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "puppeteer": "^24.6.1"
+    "@astrojs/netlify": "^5.5.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "astro": "^4.16.0"
   }
 }

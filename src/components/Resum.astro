@@ -1,0 +1,76 @@
+---
+const { resum, comparatives } = Astro.props;
+---
+<section class="resum">
+  <div class="capsula gran">
+    <p>Percentatge mitjà d'ompliment</p>
+    <h2 class="mono">{resum.percentatgeMitja !== null ? `${resum.percentatgeMitja.toFixed(1)}%` : '—'}</h2>
+  </div>
+  <div class="capsula">
+    <p>Volum total embassat</p>
+    <h3 class="mono">{resum.volumTotal.toFixed(1)} hm³</h3>
+    <p class="sub">de {resum.capacitatMaxima} hm³ de capacitat</p>
+  </div>
+  <div class="capsula">
+    <p>Dades del dia</p>
+    <h3 class="mono">{resum.dataMesRecent ?? '—'}</h3>
+  </div>
+
+  <div class="comparatives">
+    {comparatives.map((c) => (
+      <div class="comp">
+        <span class="etiqueta">{c.label}</span>
+        {c.disponible ? (
+          <span class:list={['dif', 'mono', c.diferencia >= 0 ? 'puja' : 'baixa']}>
+            {c.diferencia >= 0 ? '+' : ''}{c.diferencia.toFixed(1)} hm³
+          </span>
+        ) : (
+          <span class="dif mono sense-dada">sense dada</span>
+        )}
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .resum {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .capsula {
+    background: var(--surface-card);
+    padding: 20px;
+  }
+  .capsula.gran { grid-row: span 1; }
+  .capsula p { margin: 0 0 6px; font-size: 0.78rem; color: var(--ink-soft); }
+  .capsula h2 { font-size: 2.4rem; color: var(--water-deep); }
+  .capsula h3 { font-size: 1.3rem; }
+  .sub { margin-top: 4px !important; font-size: 0.72rem !important; }
+
+  .comparatives {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--surface-dim);
+  }
+  .comp {
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .etiqueta { font-size: 0.72rem; color: var(--ink-soft); }
+  .dif { font-size: 0.95rem; }
+  .puja { color: var(--water-deep); }
+  .baixa { color: var(--alert); }
+  .sense-dada { color: var(--ink-soft); font-style: italic; }
+
+  @media (max-width: 640px) {
+    .resum { grid-template-columns: 1fr; }
+    .comparatives { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

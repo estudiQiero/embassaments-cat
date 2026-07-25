@@ -1,0 +1,76 @@
+/* ---------------------------------------------------------------
+   Tokens de diseño
+
+   Dirección: estación hidrométrica / limnígrafo — la estética de
+   las fichas de aforo y las curvas de nivel, no un dashboard
+   genérico. El color codifica severidad en una única rampa
+   (agua profunda → agua escasa), no un arcoíris de semáforo.
+------------------------------------------------------------------ */
+:root {
+  --ink: #142b27;
+  --ink-soft: #4b5c58;
+  --surface: #efebe1;
+  --surface-dim: #e2ddcf;
+  --surface-card: #f7f5ee;
+  --water-deep: #1d6673;
+  --water-mid: #4c93a0;
+  --water-pale: #bfe0e3;
+  --alert: #a6521e;
+  --line: #cdc7b6;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --radius: 2px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+body {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 39px,
+      var(--line) 39px,
+      var(--line) 40px
+    );
+  background-attachment: local;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+a { color: var(--water-deep); }
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.contour {
+  height: 1px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--ink) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0.35;
+  margin: 48px 0;
+}
