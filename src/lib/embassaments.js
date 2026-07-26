@@ -11,17 +11,18 @@ const ACA_ENDPOINT = 'https://analisi.transparenciacatalunya.cat/resource/gn9e-3
 
 // Embassaments de les conques internes que volem seguir.
 // Clau = nom exacte tal com apareix al camp "estaci" del dataset.
+// poblacio = habitants del municipi on hi ha l'embassament (INE/Idescat 2025).
 export const EMBASSAMENTS = [
-  { estaci: 'Embassament de la Baells (Cercs)', slug: 'baells', imatge: 'baells.jpg' },
-  { estaci: 'Embassament de Sau (Vilanova de Sau)', slug: 'sau', imatge: 'sau.jpg' },
-  { estaci: 'Embassament de Susqueda (Osor)', slug: 'susqueda', imatge: 'susqueda.jpg' },
-  { estaci: 'Embassament de Sant Ponç (Clariana de Cardener)', slug: 'sant-ponc', imatge: 'sant-ponc.jpg' },
-  { estaci: 'Embassament de la Llosa del Cavall (Navès)', slug: 'llosa-del-cavall', imatge: 'llosa_del_cavall.webp' },
-  { estaci: 'Embassament de Foix (Castellet i la Gornal)', slug: 'foix', imatge: 'foix_albertsampietro_com.webp' },
-  { estaci: 'Embassament de Siurana (Cornudella de Montsant)', slug: 'siurana', imatge: 'Siurana_turismesiurana_org.webp' },
-  { estaci: 'Embassament de Darnius Boadella (Darnius)', slug: 'darnius-boadella', imatge: 'Darnius_Boadella_El_punt_Avui.webp' },
-  { estaci: 'Embassament de Riudecanyes (Riudecanyes)', slug: 'riudecanyes', imatge: 'riudecanyes.jpg' },
-  { estaci: "Embassament d'Oliana (Oliana)", slug: 'oliana', imatge: 'oliana.jpg' },
+  { estaci: 'Embassament de la Baells (Cercs)', slug: 'baells', municipi: 'Cercs', poblacio: 1193, imatge: 'baells.jpg' },
+  { estaci: 'Embassament de Sau (Vilanova de Sau)', slug: 'sau', municipi: 'Vilanova de Sau', poblacio: 325, imatge: 'sau.jpg' },
+  { estaci: 'Embassament de Susqueda (Osor)', slug: 'susqueda', municipi: 'Osor', poblacio: 430, imatge: 'susqueda.jpg' },
+  { estaci: 'Embassament de Sant Ponç (Clariana de Cardener)', slug: 'sant-ponc', municipi: 'Clariana de Cardener', poblacio: 160, imatge: 'sant-ponc.jpg' },
+  { estaci: 'Embassament de la Llosa del Cavall (Navès)', slug: 'llosa-del-cavall', municipi: 'Navès', poblacio: 292, imatge: 'llosa_del_cavall.webp' },
+  { estaci: 'Embassament de Foix (Castellet i la Gornal)', slug: 'foix', municipi: 'Castellet i la Gornal', poblacio: 2776, imatge: 'foix_albertsampietro_com.webp' },
+  { estaci: 'Embassament de Siurana (Cornudella de Montsant)', slug: 'siurana', municipi: 'Cornudella de Montsant', poblacio: 999, imatge: 'Siurana_turismesiurana_org.webp' },
+  { estaci: 'Embassament de Darnius Boadella (Darnius)', slug: 'darnius-boadella', municipi: 'Darnius', poblacio: 563, imatge: 'Darnius_Boadella_El_punt_Avui.webp' },
+  { estaci: 'Embassament de Riudecanyes (Riudecanyes)', slug: 'riudecanyes', municipi: 'Riudecanyes', poblacio: 1362, imatge: 'riudecanyes.jpg' },
+  { estaci: "Embassament d'Oliana (Oliana)", slug: 'oliana', municipi: 'Oliana', poblacio: 1874, imatge: 'oliana.jpg' },
 ];
 
 const NOMS_VALIDS = new Set(EMBASSAMENTS.map((e) => e.estaci));

@@ -2,44 +2,133 @@
 import NivellBar from './NivellBar.astro';
 
 const { embassament } = Astro.props;
-const [nom, zona] = embassament.estaci.replace('Embassament de ', '').replace('Embassament ', '').split(' (');
-const zonaNeta = zona ? zona.replace(')', '') : '';
+const nom = embassament.estaci.replace('Embassament de ', '').replace('Embassament ', '').split(' (')[0];
+const imgSrc = embassament.imatge ? `/img/${embassament.imatge}` : null;
 ---
 <article class="card">
-  <NivellBar percentatge={embassament.percentatge} />
-  <div class="info">
-    <h3>{nom}</h3>
-    {zonaNeta && <p class="zona">{zonaNeta}</p>}
-    <dl>
-      <div>
+  <!-- Fila 1: nom -->
+  <h3>{nom}</h3>
+
+  <!-- Fila 2: població -->
+  <p class="poblacio">
+    {embassament.municipi} · <span class="mono">{embassament.poblacio.toLocaleString('ca-ES')}</span> habitants
+  </p>
+
+  <!-- Fila 3: foto a tot l'ample -->
+  <div class="foto">
+    {imgSrc ? (
+      <img src={imgSrc} alt={`Vista de l'embassament de ${nom}`} loading="lazy" onerror="this.closest('.foto').classList.add('sense-foto')" />
+    ) : (
+      <div class="placeholder" aria-hidden="true"></div>
+    )}
+    <span class="placeholder-text">Fotografia pendent</span>
+  </div>
+
+  <!-- Fila 4: dues columnes -->
+  <div class="detall">
+    <div class="col-grafica">
+      <NivellBar percentatge={embassament.percentatge} />
+    </div>
+    <div class="col-dades">
+      <div class="dada">
         <dt>Nivell absolut</dt>
-        <dd class="mono">{embassament.nivellAbsolut !== null ? `${embassament.nivellAbsolut} m` : 'No disponible'}</dd>
+        <dd class="mono">{embassament.nivellAbsolut !== null ? `${embassament.nivellAbsolut} m` : '—'}</dd>
       </div>
-      <div>
+      <div class="dada">
         <dt>Volum embassat</dt>
-        <dd class="mono">{embassament.volum !== null ? `${embassament.volum.toFixed(2)} hm³` : 'No disponible'}</dd>
+        <dd class="mono">{embassament.volum !== null ? `${embassament.volum.toFixed(2)} hm³` : '—'}</dd>
       </div>
-    </dl>
+    </div>
   </div>
 </article>
 
 <style>
   .card {
     display: flex;
-    gap: 16px;
-    padding: 16px;
+    flex-direction: column;
     background: var(--surface-card);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    overflow: hidden;
   }
-  h3 { font-size: 1.05rem; }
-  .zona {
-    margin: 2px 0 10px;
-    font-size: 0.8rem;
+  h3 {
+    font-size: 1.25rem;
+    padding: 16px 16px 0;
+  }
+  .poblacio {
+    margin: 4px 0 0;
+    padding: 0 16px 14px;
+    font-size: 0.82rem;
     color: var(--ink-soft);
   }
-  dl { margin: 0; display: grid; gap: 4px; }
-  dl div { display: flex; justify-content: space-between; gap: 12px; }
-  dt { font-size: 0.72rem; color: var(--ink-soft); font-weight: 400; }
-  dd { margin: 0; font-size: 0.82rem; }
+
+  .foto {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--surface-dim);
+  }
+  .foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .foto .placeholder {
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      135deg,
+      var(--surface-dim),
+      var(--surface-dim) 10px,
+      var(--line) 10px,
+      var(--line) 11px
+    );
+  }
+  .placeholder-text {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+  }
+  .foto:has(.placeholder) .placeholder-text,
+  .foto.sense-foto .placeholder-text {
+    display: flex;
+  }
+  .foto.sense-foto img { display: none; }
+
+  .detall {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 16px;
+    padding: 20px 16px;
+  }
+  .col-grafica {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .col-dades {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+  .dada dt {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin: 0 0 4px;
+  }
+  .dada dd {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  @media (max-width: 480px) {
+    .detall { grid-template-columns: 1fr; }
+  }
 </style>

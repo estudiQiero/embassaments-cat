@@ -82,8 +82,12 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=1800');
 
   .graella {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 720px) {
+    .graella { grid-template-columns: 1fr; }
   }
 
   .explicacio { max-width: 46em; margin-bottom: 64px; }

@@ -4,7 +4,8 @@
 // superficie del agua) y marcas de cota cada 25%. El color pasa de
 // agua-pálida a agua-profunda según el nivel; solo entra en rojo/ocre
 // de alerta por debajo del 20%, en vez del arcoíris fijo del proyecto
-// anterior.
+// anterior. El % va debajo, no superpuesto, para que sea legible a
+// tamaño grande dentro de la columna de la tarjeta.
 interface Props {
   percentatge: number | null;
 }
@@ -17,9 +18,7 @@ const yAigua = 90 - alturaAigua;
 ---
 <div class="nivell-bar" role="img" aria-label={percentatge === null ? 'Nivell no disponible' : `Nivell al ${pct.toFixed(1)}%`}>
   <svg viewBox="0 0 120 96" preserveAspectRatio="none">
-    <!-- marco -->
     <rect x="1" y="4" width="118" height="88" fill="none" stroke="var(--line)" stroke-width="1" />
-    <!-- marcas de cota -->
     {[25, 50, 75].map((marca) => (
       <line x1="1" x2="9" y1={90 - 84 * (marca / 100)} y2={90 - 84 * (marca / 100)} stroke="var(--ink-soft)" stroke-width="1" opacity="0.5" />
     ))}
@@ -38,19 +37,15 @@ const yAigua = 90 - alturaAigua;
 
 <style>
   .nivell-bar {
-    position: relative;
-    width: 64px;
-    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
   }
-  svg { width: 100%; height: auto; display: block; }
+  svg { width: 100%; height: auto; display: block; max-height: 190px; }
   .valor {
-    position: absolute;
-    bottom: 6px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 0.72rem;
+    font-size: 1.6rem;
     font-weight: 500;
-    text-shadow: 0 0 3px var(--surface-card);
   }
 </style>

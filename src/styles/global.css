@@ -36,15 +36,7 @@ html, body {
 }
 
 body {
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent 39px,
-      var(--line) 39px,
-      var(--line) 40px
-    );
-  background-attachment: local;
+  background: var(--surface);
 }
 
 h1, h2, h3 {
