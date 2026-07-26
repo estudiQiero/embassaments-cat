@@ -84,3 +84,38 @@ export function calculaResum(embassaments) {
 
   return { volumTotal, percentatgeMitja, dataMesRecent, capacitatMaxima: 700 };
 }
+
+/**
+ * Demana al dataset de l'ACA la lectura més recent de cada embassament
+ * amb data igual o anterior a `dataObjectiuISO`, per poder calcular
+ * comparatives històriques sense dependre de Supabase.
+ */
+export async function fetchVolumEnData(dataObjectiuISO, fetchFn = fetch) {
+  const url = new URL(ACA_ENDPOINT);
+  const nomsEscapats = EMBASSAMENTS.map((e) => `'${e.estaci.replace(/'/g, "''")}'`).join(',');
+  url.searchParams.set('$where', `estaci in(${nomsEscapats}) AND dia<='${dataObjectiuISO}T23:59:59'`);
+  url.searchParams.set('$order', 'dia DESC');
+  url.searchParams.set('$limit', '200');
+
+  const resposta = await fetchFn(url.toString());
+  if (!resposta.ok) {
+    throw new Error(`ACA ha respost ${resposta.status}`);
+  }
+  const files = await resposta.json();
+
+  const mesProperPerEmbassament = new Map();
+  for (const fila of files) {
+    const nom = fila.estaci?.trim();
+    if (!nom || mesProperPerEmbassament.has(nom)) continue;
+    mesProperPerEmbassament.set(nom, fila);
+  }
+
+  if (mesProperPerEmbassament.size === 0) return null;
+
+  const volumTotal = [...mesProperPerEmbassament.values()].reduce(
+    (acc, fila) => acc + (netejaNum(fila.volum_embassat) ?? 0),
+    0
+  );
+
+  return { volumTotal, embassamentsTrobats: mesProperPerEmbassament.size };
+}

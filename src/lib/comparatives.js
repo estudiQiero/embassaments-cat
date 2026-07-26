@@ -1,4 +1,6 @@
 // src/lib/comparatives.js
+import { fetchVolumEnData } from './embassaments.js';
+
 const PERIODES = [
   { id: 'ahir', label: 'Ahir', dies: 1 },
   { id: 'fa7', label: 'Fa 7 dies', dies: 7 },
@@ -14,33 +16,27 @@ function restaDies(dataISO, dies) {
 
 /**
  * Para cada periodo (ayer, 7d, 30d, 365d), busca en el histórico de
- * Supabase la fecha exacta objetivo (si no hay dato de ese día exacto
- * -por ejemplo, si el cron falló un día- simplemente no se muestra
- * ese periodo en vez de dar un dato erróneo).
+ * la ACA la lectura más reciente con fecha igual o anterior a la
+ * fecha objetivo (si no hay ningún dato hasta esa fecha, simplemente
+ * no se muestra ese periodo en vez de dar un dato erróneo).
  */
-export async function calculaComparatives(supabase, dataReferencia, volumAvui) {
-  const resultats = [];
+export async function calculaComparatives(dataReferencia, volumAvui, fetchFn) {
+  const resultats = await Promise.all(
+    PERIODES.map(async (periode) => {
+      const dataObjectiu = restaDies(dataReferencia, periode.dies);
+      const dades = await fetchVolumEnData(dataObjectiu, fetchFn);
 
-  for (const periode of PERIODES) {
-    const dataObjectiu = restaDies(dataReferencia, periode.dies);
+      if (!dades) {
+        return { ...periode, disponible: false };
+      }
 
-    const { data, error } = await supabase
-      .from('lectures_embassaments')
-      .select('volum')
-      .eq('dia', dataObjectiu);
-
-    if (error || !data || data.length === 0) {
-      resultats.push({ ...periode, disponible: false });
-      continue;
-    }
-
-    const volumHistoric = data.reduce((acc, fila) => acc + (fila.volum ?? 0), 0);
-    resultats.push({
-      ...periode,
-      disponible: true,
-      diferencia: volumAvui - volumHistoric,
-    });
-  }
+      return {
+        ...periode,
+        disponible: true,
+        diferencia: volumAvui - dades.volumTotal,
+      };
+    })
+  );
 
   return resultats;
 }

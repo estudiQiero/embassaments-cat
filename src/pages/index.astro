@@ -4,7 +4,6 @@ import Resum from '../components/Resum.astro';
 import EmbassamentCard from '../components/EmbassamentCard.astro';
 import { fetchLiveData, calculaResum } from '../lib/embassaments.js';
 import { calculaComparatives } from '../lib/comparatives.js';
-import { getReadClient } from '../lib/supabase.js';
 
 // Esta página se renderiza en cada visita (SSR, ver astro.config.mjs:
 // output "server"). Netlify la sirve como función con caché de CDN
@@ -20,8 +19,7 @@ try {
   resum = calculaResum(embassaments);
 
   if (resum.dataMesRecent) {
-    const supabase = getReadClient();
-    comparatives = await calculaComparatives(supabase, resum.dataMesRecent, resum.volumTotal);
+    comparatives = await calculaComparatives(resum.dataMesRecent, resum.volumTotal, fetch);
   }
 } catch (err) {
   errorCarrega = err instanceof Error ? err.message : 'Error desconegut';
