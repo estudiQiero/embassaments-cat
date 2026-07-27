@@ -46,7 +46,7 @@ h1, h2, h3 {
   margin: 0;
 }
 
-.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); font-variant-numeric: oldstyle-nums tabular-nums; }
 
 a { color: var(--water-deep); }
 
