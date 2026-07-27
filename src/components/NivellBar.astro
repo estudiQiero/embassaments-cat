@@ -16,13 +16,19 @@ const color = pct < 20 ? 'var(--alert)' : pct < 45 ? 'var(--water-mid)' : 'var(-
 const alturaAigua = 84 * (pct / 100);
 const yAigua = 90 - alturaAigua;
 const gradId = `aigua-grad-${Math.random().toString(36).slice(2, 9)}`;
+
+// Onatge molt subtil: la mateixa corba de la superfície oscil·lant
+// entre dues fases (cresta amunt / avall) per suggerir aigua viva,
+// sense que es noti com una animació brusca.
+const onadaA = `M1,${yAigua} Q30,${yAigua - 3} 60,${yAigua} T119,${yAigua} L119,92 L1,92 Z`;
+const onadaB = `M1,${yAigua} Q30,${yAigua + 3} 60,${yAigua} T119,${yAigua} L119,92 L1,92 Z`;
 ---
 <div class="nivell-bar" role="img" aria-label={percentatge === null ? 'Nivell no disponible' : `Nivell al ${pct.toFixed(1)}%`}>
   <svg viewBox="0 0 120 96" preserveAspectRatio="none">
     <defs>
       <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color={color} stop-opacity="1" />
-        <stop offset="100%" stop-color={color} stop-opacity="0.6" />
+        <stop offset="100%" stop-color={color} stop-opacity="0.35" />
       </linearGradient>
     </defs>
     <rect x="1" y="4" width="118" height="88" fill="none" stroke="var(--line)" stroke-width="1" />
@@ -30,10 +36,17 @@ const gradId = `aigua-grad-${Math.random().toString(36).slice(2, 9)}`;
       <line x1="1" x2="9" y1={90 - 84 * (marca / 100)} y2={90 - 84 * (marca / 100)} stroke="var(--ink-soft)" stroke-width="1" opacity="0.5" />
     ))}
     {percentatge !== null && (
-      <path
-        d={`M1,${yAigua} Q30,${yAigua - 3} 60,${yAigua} T119,${yAigua} L119,92 L1,92 Z`}
-        fill={`url(#${gradId})`}
-      />
+      <path fill={`url(#${gradId})`} d={onadaA}>
+        <animate
+          attributeName="d"
+          dur="5s"
+          repeatCount="indefinite"
+          calcMode="spline"
+          keyTimes="0; 0.5; 1"
+          keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"
+          values={`${onadaA}; ${onadaB}; ${onadaA}`}
+        />
+      </path>
     )}
   </svg>
   <span class="valor mono" style={`color:${color}`}>
