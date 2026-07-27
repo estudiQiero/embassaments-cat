@@ -2,6 +2,19 @@
 import GaugeGlobal from './GaugeGlobal.astro';
 const { resum, comparatives } = Astro.props;
 ---
+<div class="selector-dia">
+  <p class="data-actual mono">{resum.dataMesRecent ?? '—'}</p>
+  <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Consulta un altre dia…</button>
+  <input
+    type="date"
+    id="input-data-historica"
+    class="input-data-historica"
+    max={resum.dataMesRecent ?? undefined}
+    min="2000-01-01"
+    hidden
+  />
+</div>
+
 <section class="resum">
   <div class="capsula gran">
     <p>Percentatge mitjà d'ompliment</p>
@@ -9,17 +22,18 @@ const { resum, comparatives } = Astro.props;
   </div>
 
   <div class="capsules-dretes">
-    <div class="capsula">
-      <p>Volum total embassat</p>
+    <div class="capsula capsula-volum">
+      <p>Volum total embassat avui</p>
       <h3 class="mono">{resum.volumTotal.toFixed(1)} hm³</h3>
       <p class="sub">de {resum.capacitatMaxima} hm³ de capacitat</p>
-    </div>
-    <div class="capsula">
-      <p>Dades del dia</p>
-      <h3 class="mono">{resum.dataMesRecent ?? '—'}</h3>
+
+      <div class="fila-historica" id="fila-historica" hidden>
+        <p id="label-historic">Volum total embassat el dia —</p>
+        <h3 class="mono" id="valor-historic">— hm³</h3>
+      </div>
     </div>
 
-    <div class="comparatives">
+    <div class="comparatives" id="comparatives-relatives">
       {comparatives.map((c) => (
         <div class="comp">
           <span class="etiqueta">{c.label}</span>
@@ -36,7 +50,76 @@ const { resum, comparatives } = Astro.props;
   </div>
 </section>
 
+<script>
+  import { fetchVolumEnData } from '../lib/embassaments.js';
+
+  const btn = document.getElementById('btn-mostrar-dia');
+  const input = document.getElementById('input-data-historica');
+  const comparatives = document.getElementById('comparatives-relatives');
+  const filaHistorica = document.getElementById('fila-historica');
+  const labelHistoric = document.getElementById('label-historic');
+  const valorHistoric = document.getElementById('valor-historic');
+  const avuiISO = input?.max || null;
+
+  btn?.addEventListener('click', () => {
+    input.hidden = false;
+    input.focus();
+    if (typeof input.showPicker === 'function') input.showPicker();
+  });
+
+  input?.addEventListener('change', async () => {
+    const dataSeleccionada = input.value;
+
+    if (!dataSeleccionada || dataSeleccionada === avuiISO) {
+      filaHistorica.hidden = true;
+      comparatives.hidden = false;
+      return;
+    }
+
+    comparatives.hidden = true;
+    filaHistorica.hidden = false;
+    labelHistoric.textContent = `Volum total embassat el dia ${dataSeleccionada}`;
+    valorHistoric.textContent = 'Carregant…';
+
+    try {
+      const dades = await fetchVolumEnData(dataSeleccionada);
+      valorHistoric.textContent = dades ? `${dades.volumTotal.toFixed(1)} hm³` : 'Sense dades';
+    } catch {
+      valorHistoric.textContent = 'Error carregant les dades';
+    }
+  });
+</script>
+
 <style>
+  .selector-dia {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .data-actual { font-size: 0.95rem; color: var(--ink-soft); margin: 0; }
+  .btn-mostrar-dia {
+    font: inherit;
+    font-size: 0.78rem;
+    color: var(--water-deep);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .btn-mostrar-dia:hover { background: var(--surface-dim); }
+  .input-data-historica {
+    font: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 5px 10px;
+    background: var(--surface-card);
+    color: var(--ink);
+  }
+
   .resum {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -65,6 +148,13 @@ const { resum, comparatives } = Astro.props;
   .capsules-dretes {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+  .capsula-volum { grid-column: 1 / -1; }
+
+  .fila-historica {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
   }
 
   .comparatives {
