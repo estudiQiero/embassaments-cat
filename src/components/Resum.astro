@@ -25,7 +25,7 @@ const { resum, comparatives } = Astro.props;
           <span class="etiqueta">{c.label}</span>
           {c.disponible ? (
             <span class:list={['dif', 'mono', c.diferencia >= 0 ? 'puja' : 'baixa']}>
-              {c.diferencia >= 0 ? '+' : ''}{c.diferencia.toFixed(1)} hm³
+              {c.diferencia >= 0 ? '+' : ''}{c.diferencia.toFixed(1)} hm³ | {c.percentatgeMitja.toFixed(1)}%
             </span>
           ) : (
             <span class="dif mono sense-dada">sense dada</span>

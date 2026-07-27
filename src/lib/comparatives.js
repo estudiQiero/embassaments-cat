@@ -34,6 +34,7 @@ export async function calculaComparatives(dataReferencia, volumAvui, fetchFn) {
         ...periode,
         disponible: true,
         diferencia: volumAvui - dades.volumTotal,
+        percentatgeMitja: dades.percentatgeMitja,
       };
     })
   );

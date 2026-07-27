@@ -11,7 +11,8 @@ const imgSrc = embassament.imatge ? `/img/${embassament.imatge}` : null;
 
   <!-- Fila 2: població -->
   <p class="poblacio">
-    {embassament.municipi} · <span class="mono">{embassament.poblacio.toLocaleString('ca-ES')}</span> habitants
+    {embassament.municipi} · {embassament.comarca}<br />
+    <span class="mono">{embassament.poblacio.toLocaleString('ca-ES')}</span> habitants
   </p>
 
   <!-- Fila 3: foto a tot l'ample -->
@@ -112,9 +113,9 @@ const imgSrc = embassament.imatge ? `/img/${embassament.imatge}` : null;
     justify-content: center;
   }
   .col-dades {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
     gap: 16px;
   }
   .dada dt {
