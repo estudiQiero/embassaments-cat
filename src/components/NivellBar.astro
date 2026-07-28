@@ -31,7 +31,7 @@ const onadaB = `M1,${yAigua} Q30,${yAigua + 3} 60,${yAigua} T119,${yAigua} L119,
         <stop offset="100%" stop-color={color} stop-opacity="0.35" />
       </linearGradient>
     </defs>
-    <rect x="1" y="4" width="118" height="88" fill="none" stroke="var(--line)" stroke-width="1" />
+    <path d="M1,4 L1,92 L119,92 L119,4" fill="none" stroke="var(--line)" stroke-width="1" />
     {[25, 50, 75].map((marca) => (
       <line x1="1" x2="9" y1={90 - 84 * (marca / 100)} y2={90 - 84 * (marca / 100)} stroke="var(--ink-soft)" stroke-width="1" opacity="0.5" />
     ))}

@@ -97,6 +97,7 @@ const { resum, comparatives } = Astro.props;
     diferenciaHistorica.hidden = true;
     labelHistoric.textContent = `Volum total embassat el dia ${dataSeleccionada}`;
     valorHistoric.textContent = 'Carregant…';
+    valorHistoric.className = 'mono';
 
     try {
       const dades = await fetchVolumEnData(dataSeleccionada);
@@ -104,11 +105,16 @@ const { resum, comparatives } = Astro.props;
         valorHistoric.textContent = 'Sense dades';
         return;
       }
-      valorHistoric.textContent = `${dades.volumTotal.toFixed(1)} hm³`;
 
-      const diffVol = volumAvui - dades.volumTotal;
-      const diffPct = percentatgeAvui - dades.percentatgeMitja;
+      // La comparació es fa respecte a la dada triada: si aquell dia
+      // hi havia menys aigua que avui, el resultat és negatiu (vermell,
+      // fletxa avall); si n'hi havia més, és positiu (verd, fletxa amunt).
+      const diffVol = dades.volumTotal - volumAvui;
+      const diffPct = dades.percentatgeMitja - percentatgeAvui;
       const positiva = diffVol >= 0;
+
+      valorHistoric.textContent = `${dades.volumTotal.toFixed(1)} hm³`;
+      valorHistoric.className = `mono ${positiva ? 'positiu' : 'negatiu'}`;
 
       diferenciaHistorica.className = `diferencia-historica ${positiva ? 'positiu' : 'negatiu'}`;
       fletxaHistorica.innerHTML = fletxaSVG(positiva);
