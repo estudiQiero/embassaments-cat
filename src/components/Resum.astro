@@ -2,19 +2,6 @@
 import GaugeGlobal from './GaugeGlobal.astro';
 const { resum, comparatives } = Astro.props;
 ---
-<div class="selector-dia">
-  <p class="data-actual mono">{resum.dataMesRecent ?? '—'}</p>
-  <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Consulta un altre dia…</button>
-  <input
-    type="date"
-    id="input-data-historica"
-    class="input-data-historica"
-    max={resum.dataMesRecent ?? undefined}
-    min="2000-01-01"
-    hidden
-  />
-</div>
-
 <section class="resum">
   <div class="capsula gran">
     <p>Percentatge mitjà d'ompliment</p>
@@ -23,13 +10,31 @@ const { resum, comparatives } = Astro.props;
 
   <div class="capsules-dretes">
     <div class="capsula capsula-volum">
-      <p>Volum total embassat avui</p>
+      <p>Volum total embassat avui dia {resum.dataMesRecent ?? '—'}</p>
       <h3 class="mono">{resum.volumTotal.toFixed(1)} hm³</h3>
       <p class="sub">de {resum.capacitatMaxima} hm³ de capacitat</p>
+
+      <hr class="separador" />
+
+      <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Consulta un altre dia…</button>
+      <input
+        type="date"
+        id="input-data-historica"
+        class="input-data-historica"
+        max={resum.dataMesRecent ?? undefined}
+        min="2000-01-01"
+        data-volum-avui={resum.volumTotal}
+        data-percentatge-avui={resum.percentatgeMitja ?? ''}
+        hidden
+      />
 
       <div class="fila-historica" id="fila-historica" hidden>
         <p id="label-historic">Volum total embassat el dia —</p>
         <h3 class="mono" id="valor-historic">— hm³</h3>
+        <p class="diferencia-historica" id="diferencia-historica" hidden>
+          <span class="fletxa" id="fletxa-historica"></span>
+          <span class="mono" id="text-diferencia"></span>
+        </p>
       </div>
     </div>
 
@@ -59,7 +64,18 @@ const { resum, comparatives } = Astro.props;
   const filaHistorica = document.getElementById('fila-historica');
   const labelHistoric = document.getElementById('label-historic');
   const valorHistoric = document.getElementById('valor-historic');
+  const diferenciaHistorica = document.getElementById('diferencia-historica');
+  const fletxaHistorica = document.getElementById('fletxa-historica');
+  const textDiferencia = document.getElementById('text-diferencia');
+
   const avuiISO = input?.max || null;
+  const volumAvui = parseFloat(input?.dataset.volumAvui ?? 'NaN');
+  const percentatgeAvui = parseFloat(input?.dataset.percentatgeAvui ?? 'NaN');
+
+  function fletxaSVG(positiva) {
+    const d = positiva ? 'M4,10 L8,6 L12,10' : 'M4,6 L8,10 L12,6';
+    return `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="${d}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" /></svg>`;
+  }
 
   btn?.addEventListener('click', () => {
     input.hidden = false;
@@ -78,12 +94,26 @@ const { resum, comparatives } = Astro.props;
 
     comparatives.hidden = true;
     filaHistorica.hidden = false;
+    diferenciaHistorica.hidden = true;
     labelHistoric.textContent = `Volum total embassat el dia ${dataSeleccionada}`;
     valorHistoric.textContent = 'Carregant…';
 
     try {
       const dades = await fetchVolumEnData(dataSeleccionada);
-      valorHistoric.textContent = dades ? `${dades.volumTotal.toFixed(1)} hm³` : 'Sense dades';
+      if (!dades) {
+        valorHistoric.textContent = 'Sense dades';
+        return;
+      }
+      valorHistoric.textContent = `${dades.volumTotal.toFixed(1)} hm³`;
+
+      const diffVol = volumAvui - dades.volumTotal;
+      const diffPct = percentatgeAvui - dades.percentatgeMitja;
+      const positiva = diffVol >= 0;
+
+      diferenciaHistorica.className = `diferencia-historica ${positiva ? 'positiu' : 'negatiu'}`;
+      fletxaHistorica.innerHTML = fletxaSVG(positiva);
+      textDiferencia.textContent = `${positiva ? '+' : ''}${diffVol.toFixed(1)} hm³ | ${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(1)}%`;
+      diferenciaHistorica.hidden = false;
     } catch {
       valorHistoric.textContent = 'Error carregant les dades';
     }
@@ -91,35 +121,6 @@ const { resum, comparatives } = Astro.props;
 </script>
 
 <style>
-  .selector-dia {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
-  .data-actual { font-size: 0.95rem; color: var(--ink-soft); margin: 0; }
-  .btn-mostrar-dia {
-    font: inherit;
-    font-size: 0.78rem;
-    color: var(--water-deep);
-    background: none;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 6px 12px;
-    cursor: pointer;
-  }
-  .btn-mostrar-dia:hover { background: var(--surface-dim); }
-  .input-data-historica {
-    font: inherit;
-    font-size: 0.85rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 5px 10px;
-    background: var(--surface-card);
-    color: var(--ink);
-  }
-
   .resum {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -149,13 +150,62 @@ const { resum, comparatives } = Astro.props;
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
-  .capsula-volum { grid-column: 1 / -1; }
+  .capsula-volum {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .separador {
+    width: 100%;
+    max-width: 260px;
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 16px 0;
+  }
+  .btn-mostrar-dia {
+    font: inherit;
+    font-size: 0.78rem;
+    color: var(--water-deep);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .btn-mostrar-dia:hover { background: var(--surface-dim); }
+  .input-data-historica {
+    font: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 5px 10px;
+    background: var(--surface-card);
+    color: var(--ink);
+    margin-top: 10px;
+  }
 
   .fila-historica {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px dashed var(--line);
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+  .fila-historica[hidden] { display: none; }
+  .diferencia-historica {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 6px 0 0 !important;
+    font-size: 0.85rem;
+  }
+  .diferencia-historica.positiu { color: var(--positiu); }
+  .diferencia-historica.negatiu { color: var(--negatiu); }
+  .diferencia-historica[hidden] { display: none; }
+  .fletxa { display: inline-flex; }
 
   .comparatives {
     grid-column: 1 / -1;
@@ -163,6 +213,7 @@ const { resum, comparatives } = Astro.props;
     grid-template-columns: repeat(4, 1fr);
     background: var(--surface-dim);
   }
+  .comparatives[hidden] { display: none; }
   .comp {
     padding: 14px 20px;
     border-top: 1px solid var(--line);
