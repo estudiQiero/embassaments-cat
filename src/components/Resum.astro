@@ -97,7 +97,6 @@ const { resum, comparatives } = Astro.props;
     diferenciaHistorica.hidden = true;
     labelHistoric.textContent = `Volum total embassat el dia ${dataSeleccionada}`;
     valorHistoric.textContent = 'Carregant…';
-    valorHistoric.className = 'mono';
 
     try {
       const dades = await fetchVolumEnData(dataSeleccionada);
@@ -114,7 +113,6 @@ const { resum, comparatives } = Astro.props;
       const positiva = diffVol >= 0;
 
       valorHistoric.textContent = `${dades.volumTotal.toFixed(1)} hm³`;
-      valorHistoric.className = `mono ${positiva ? 'positiu' : 'negatiu'}`;
 
       diferenciaHistorica.className = `diferencia-historica ${positiva ? 'positiu' : 'negatiu'}`;
       fletxaHistorica.innerHTML = fletxaSVG(positiva);
@@ -208,9 +206,9 @@ const { resum, comparatives } = Astro.props;
     margin: 6px 0 0 !important;
     font-size: 0.85rem;
   }
-  .diferencia-historica.positiu { color: var(--positiu); }
-  .diferencia-historica.negatiu { color: var(--negatiu); }
   .diferencia-historica[hidden] { display: none; }
+  .positiu { color: var(--positiu) !important; }
+  .negatiu { color: var(--negatiu) !important; }
   .fletxa { display: inline-flex; }
 
   .comparatives {
