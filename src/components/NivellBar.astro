@@ -74,6 +74,10 @@ const desplaçament = 25;
       <g class="marcador-historic">
         <line x1="1" x2="119" y1="48" y2="48" class="linia-historica" />
         <text x="124" y="51" class="text-historic" text-anchor="start">—</text>
+        <g class="pastilla-avui">
+          <rect x="40" y="87" width="40" height="10" rx="5" ry="5" />
+          <text x="60" y="94.3" text-anchor="middle">AVUI</text>
+        </g>
       </g>
     </g>
   </svg>
@@ -91,7 +95,7 @@ const desplaçament = 25;
     align-items: center;
     gap: 8px;
   }
-  svg { width: 100%; height: auto; display: block; max-height: 190px; }
+  svg { width: 100%; height: auto; display: block; max-height: 190px; overflow: visible; }
   .valor {
     font-size: 1.6rem;
     font-weight: 500;
@@ -117,5 +121,15 @@ const desplaçament = 25;
     fill: var(--negatiu);
     font-family: var(--font-body);
     font-size: 9px;
+  }
+  .pastilla-avui rect {
+    fill: var(--water-deep);
+  }
+  .pastilla-avui text {
+    fill: #fff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 6.5px;
+    letter-spacing: 0.04em;
   }
 </style>
