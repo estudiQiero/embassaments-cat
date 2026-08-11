@@ -20,7 +20,7 @@ const { resum, comparatives } = Astro.props;
 
       <hr class="separador" />
 
-      <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Compara amb un altre dia</button>
+      <label for="input-data-historica" class="label-selector-dia">Compara amb un altre dia</label>
       <input
         type="date"
         id="input-data-historica"
@@ -29,7 +29,6 @@ const { resum, comparatives } = Astro.props;
         min="2000-01-01"
         data-volum-avui={resum.volumTotal}
         data-percentatge-avui={resum.percentatgeMitja ?? ''}
-        hidden
       />
 
       <div class="fila-historica" id="fila-historica" hidden>
@@ -58,7 +57,6 @@ const { resum, comparatives } = Astro.props;
 <script>
   import { fetchVolumEnData } from '../lib/embassaments.js';
 
-  const btn = document.getElementById('btn-mostrar-dia');
   const input = document.getElementById('input-data-historica');
   const comparatives = document.getElementById('comparatives-relatives');
   const filaHistorica = document.getElementById('fila-historica');
@@ -98,12 +96,6 @@ const { resum, comparatives } = Astro.props;
     const textAnys = `${anys} any${anys === 1 ? '' : 's'}`;
     return mesos === 0 ? `fa ${textAnys}` : `fa ${textAnys} i ${mesos} mes${mesos === 1 ? '' : 'os'}`;
   }
-
-  btn?.addEventListener('click', () => {
-    input.hidden = false;
-    input.focus();
-    if (typeof input.showPicker === 'function') input.showPicker();
-  });
 
   input?.addEventListener('change', async () => {
     const dataSeleccionada = input.value;
@@ -192,17 +184,11 @@ const { resum, comparatives } = Astro.props;
     border-top: 1px solid var(--line);
     margin: 16px 0;
   }
-  .btn-mostrar-dia {
-    font: inherit;
+  .label-selector-dia {
+    display: block;
     font-size: 0.78rem;
-    color: var(--water-deep);
-    background: none;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 6px 12px;
-    cursor: pointer;
+    color: var(--ink-soft);
   }
-  .btn-mostrar-dia:hover { background: var(--surface-dim); }
   .input-data-historica {
     font: inherit;
     font-size: 0.85rem;
