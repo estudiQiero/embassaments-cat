@@ -1,2 +1,7 @@
 node_modules/
+dist/
+.netlify/
 .env
+.DS_Store
+.astro/
+src/env.d.ts

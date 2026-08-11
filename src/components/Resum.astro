@@ -1,0 +1,335 @@
+---
+import GaugeGlobal from './GaugeGlobal.astro';
+const { resum, comparatives } = Astro.props;
+---
+<section class="resum">
+  <div class="capsula gran">
+    <p>Percentatge mitjà d'ompliment</p>
+    <GaugeGlobal percentatge={resum.percentatgeMitja} />
+  </div>
+
+  <div class="capsules-dretes">
+    <div class="capsula capsula-volum">
+      <p>Volum total embassat avui dia {resum.dataMesRecent ?? '—'}</p>
+      <h3 class="mono">{resum.volumTotal.toFixed(1)} hm³</h3>
+      <p class="diferencia-historica" id="diferencia-historica" hidden>
+        <span class="fletxa" id="fletxa-historica"></span>
+        <span class="mono" id="text-diferencia"></span>
+      </p>
+      <p class="sub">de {resum.capacitatMaxima} hm³ de capacitat</p>
+      <p class="sub" id="comparat-amb" hidden>comparat amb el dia <span id="data-comparada"></span></p>
+
+      <hr class="separador" />
+
+      <div class="selector-dia">
+        <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Compara amb un altre dia</button>
+        <input
+          type="date"
+          id="input-data-historica"
+          class="input-data-historica"
+          max={resum.dataMesRecent ?? undefined}
+          min="2000-01-01"
+          data-volum-avui={resum.volumTotal}
+          data-percentatge-avui={resum.percentatgeMitja ?? ''}
+          hidden
+        />
+      </div>
+
+      <div class="fila-historica" id="fila-historica" hidden>
+        <p id="label-historic">Volum total embassat —</p>
+        <h3 class="mono" id="valor-historic">— hm³</h3>
+        <p class="sub" id="percentatge-historic"></p>
+      </div>
+    </div>
+
+    <div class="comparatives" id="comparatives-relatives">
+      {comparatives.map((c) => (
+        <div class="comp">
+          <span class="etiqueta">{c.label}</span>
+          {c.disponible ? (
+            <span class:list={['dif', 'mono', c.diferencia >= 0 ? 'puja' : 'baixa']}>
+              {c.diferencia >= 0 ? '+' : ''}{c.diferencia.toFixed(1)} hm³ | {c.percentatgeMitja.toFixed(1)}%
+            </span>
+          ) : (
+            <span class="dif mono sense-dada">sense dada</span>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { fetchVolumEnData } from '../lib/embassaments.js';
+
+  const btn = document.getElementById('btn-mostrar-dia');
+  const input = document.getElementById('input-data-historica');
+  const comparatives = document.getElementById('comparatives-relatives');
+  const filaHistorica = document.getElementById('fila-historica');
+  const labelHistoric = document.getElementById('label-historic');
+  const valorHistoric = document.getElementById('valor-historic');
+  const diferenciaHistorica = document.getElementById('diferencia-historica');
+  const fletxaHistorica = document.getElementById('fletxa-historica');
+  const textDiferencia = document.getElementById('text-diferencia');
+  const comparatAmb = document.getElementById('comparat-amb');
+  const dataComparada = document.getElementById('data-comparada');
+  const percentatgeHistoric = document.getElementById('percentatge-historic');
+  const infoComparativa = document.getElementById('info-comparativa');
+  const infoComparativaData = document.getElementById('info-comparativa-data');
+
+  const avuiISO = input?.max || null;
+  const volumAvui = parseFloat(input?.dataset.volumAvui ?? 'NaN');
+  const percentatgeAvui = parseFloat(input?.dataset.percentatgeAvui ?? 'NaN');
+
+  function fletxaSVG(positiva) {
+    const d = positiva ? 'M4,10 L8,6 L12,10' : 'M4,6 L8,10 L12,6';
+    return `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="${d}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" /></svg>`;
+  }
+
+  // Expressa la distància entre dues dates ISO com "fa X dies/setmanes/mesos/anys".
+  function faTemps(dataISO, referenciaISO) {
+    const dies = Math.round((new Date(referenciaISO) - new Date(dataISO)) / 86400000);
+
+    if (dies <= 0) return 'avui';
+    if (dies === 1) return 'ahir';
+    if (dies < 14) return `fa ${dies} dies`;
+    if (dies < 60) {
+      const setmanes = Math.round(dies / 7);
+      return `fa ${setmanes} ${setmanes === 1 ? 'setmana' : 'setmanes'}`;
+    }
+    if (dies < 365) {
+      const mesos = Math.round(dies / 30.44);
+      return `fa ${mesos} mes${mesos === 1 ? '' : 'os'}`;
+    }
+
+    const anys = Math.floor(dies / 365.25);
+    const mesos = Math.round((dies - anys * 365.25) / 30.44);
+    const textAnys = `${anys} any${anys === 1 ? '' : 's'}`;
+    return mesos === 0 ? `fa ${textAnys}` : `fa ${textAnys} i ${mesos} mes${mesos === 1 ? '' : 'os'}`;
+  }
+
+  function formataData(dataISO) {
+    const [any, mes, dia] = dataISO.split('-');
+    return `${dia}/${mes}/${any}`;
+  }
+
+  // Marca, a la gràfica de cada embassament, el nivell que tenia el
+  // dia comparat (mateixa fórmula que fa servir NivellBar.astro per
+  // situar la làmina d'aigua dins del viewBox 0 0 120 96).
+  function actualitzaMarcadorsGrafica(perEmbassament) {
+    document.querySelectorAll('.nivell-bar').forEach((bar) => {
+      const marcador = bar.querySelector('.marcador-historic');
+      const dada = perEmbassament.find((e) => e.slug === bar.dataset.slug);
+      if (!marcador) return;
+      if (!dada || dada.percentatge === null) {
+        marcador.classList.remove('visible');
+        return;
+      }
+      const pct = Math.max(0, Math.min(100, dada.percentatge));
+      const y = 90 - 84 * (pct / 100);
+      marcador.querySelector('.linia-historica')?.setAttribute('y1', y);
+      marcador.querySelector('.linia-historica')?.setAttribute('y2', y);
+      const text = marcador.querySelector('.text-historic');
+      if (text) {
+        text.setAttribute('y', y + 3);
+        text.textContent = `${pct.toFixed(1)}%`;
+      }
+      marcador.classList.add('visible');
+    });
+  }
+
+  function amagaMarcadorsGrafica() {
+    document.querySelectorAll('.marcador-historic').forEach((m) => { m.classList.remove('visible'); });
+    infoComparativa.hidden = true;
+  }
+
+  btn?.addEventListener('click', () => {
+    input.hidden = false;
+    input.focus();
+    try {
+      if (typeof input.showPicker === 'function') input.showPicker();
+    } catch {
+      // El focus ja s'ha aplicat; en navegadors sense showPicker()
+      // l'usuari pot obrir el calendari igualment des del teclat.
+    }
+  });
+
+  // Si el navegador admet l'esdeveniment "cancel" (es dispara quan es
+  // tanca el calendari sense triar cap data), amaguem el camp perquè
+  // no quedi com una caixa buida. No fem servir "blur" per a això: en
+  // alguns navegadors el focus surt de l'input just en obrir-se el
+  // calendari natiu, i amagar-lo llavors tancava el selector abans de
+  // poder triar res.
+  input?.addEventListener('cancel', () => {
+    input.hidden = true;
+  });
+
+  input?.addEventListener('change', async () => {
+    const dataSeleccionada = input.value;
+    input.hidden = true;
+
+    if (!dataSeleccionada || dataSeleccionada === avuiISO) {
+      filaHistorica.hidden = true;
+      comparatives.hidden = false;
+      diferenciaHistorica.hidden = true;
+      comparatAmb.hidden = true;
+      amagaMarcadorsGrafica();
+      return;
+    }
+
+    comparatives.hidden = true;
+    filaHistorica.hidden = false;
+    diferenciaHistorica.hidden = true;
+    labelHistoric.textContent = `Volum total embassat ${faTemps(dataSeleccionada, avuiISO)}`;
+    valorHistoric.textContent = 'Carregant…';
+    percentatgeHistoric.textContent = '';
+    dataComparada.textContent = formataData(dataSeleccionada);
+    comparatAmb.hidden = false;
+    amagaMarcadorsGrafica();
+
+    try {
+      const dades = await fetchVolumEnData(dataSeleccionada);
+      if (!dades) {
+        valorHistoric.textContent = 'Sense dades';
+        return;
+      }
+
+      infoComparativaData.textContent = formataData(dataSeleccionada);
+      infoComparativa.hidden = false;
+      actualitzaMarcadorsGrafica(dades.perEmbassament ?? []);
+
+      // La comparació es fa respecte a avui: si el dia triat tenia més
+      // aigua que avui, el resultat és negatiu (vermell, fletxa avall);
+      // si en tenia menys, és positiu (verd, fletxa amunt).
+      const diffVol = volumAvui - dades.volumTotal;
+      const diffPct = percentatgeAvui - dades.percentatgeMitja;
+      const positiva = diffVol >= 0;
+
+      valorHistoric.textContent = `${dades.volumTotal.toFixed(1)} hm³`;
+      percentatgeHistoric.textContent = `Llavors el percentatge mitjà era del ${dades.percentatgeMitja.toFixed(1)}%`;
+
+      diferenciaHistorica.className = `diferencia-historica ${positiva ? 'positiu' : 'negatiu'}`;
+      fletxaHistorica.innerHTML = fletxaSVG(positiva);
+      textDiferencia.textContent = `${positiva ? '+' : ''}${diffVol.toFixed(1)} hm³ | ${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(1)}%`;
+      diferenciaHistorica.hidden = false;
+    } catch {
+      valorHistoric.textContent = 'Error carregant les dades';
+    }
+  });
+</script>
+
+<style>
+  .resum {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .capsula {
+    background: var(--surface-card);
+    padding: 24px;
+  }
+  .capsula.gran {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+  }
+  .capsula p { margin: 0 0 6px; font-size: 0.78rem; color: var(--ink-soft); }
+  .capsula h3 { font-size: 1.5rem; }
+  .sub { margin-top: 4px !important; font-size: 0.72rem !important; }
+
+  .capsules-dretes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .capsula-volum {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .separador {
+    width: 100%;
+    max-width: 260px;
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 16px 0;
+  }
+  .btn-mostrar-dia {
+    font: inherit;
+    font-size: 0.78rem;
+    color: var(--water-deep);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .btn-mostrar-dia:hover { background: var(--surface-dim); }
+  .input-data-historica {
+    display: block;
+    font: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 5px 10px;
+    background: var(--surface-card);
+    color: var(--ink);
+    margin: 10px auto 0;
+  }
+  .input-data-historica[hidden] { display: none; }
+
+  .fila-historica {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fila-historica[hidden] { display: none; }
+  .diferencia-historica {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 6px 0 0 !important;
+    font-size: 0.85rem;
+  }
+  .diferencia-historica[hidden] { display: none; }
+  .positiu { color: var(--positiu) !important; }
+  .negatiu { color: var(--negatiu) !important; }
+  .fletxa { display: inline-flex; }
+
+  .comparatives {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--surface-dim);
+  }
+  .comparatives[hidden] { display: none; }
+  .comp {
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .etiqueta { font-size: 0.72rem; color: var(--ink-soft); }
+  .dif { font-size: 0.95rem; }
+  .puja { color: var(--water-deep); }
+  .baixa { color: var(--alert); }
+  .sense-dada { color: var(--ink-soft); font-style: italic; }
+
+  @media (max-width: 720px) {
+    .resum { grid-template-columns: 1fr; }
+    .capsules-dretes { grid-template-columns: 1fr; }
+    .comparatives { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# La función de sincronización diaria se dispara sola por el
+# "export const config = { schedule: ... }" dentro del propio
+# archivo netlify/functions/sync-embassaments.mts — no hace falta
+# declarar el cron aquí también, Netlify lo detecta en el build.
+
+[functions]
+  node_bundler = "esbuild"

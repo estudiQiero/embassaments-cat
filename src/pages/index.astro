@@ -1,0 +1,144 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Resum from '../components/Resum.astro';
+import EmbassamentCard from '../components/EmbassamentCard.astro';
+import { fetchLiveData, calculaResum } from '../lib/embassaments.js';
+import { calculaComparatives } from '../lib/comparatives.js';
+
+// Esta página se renderiza en cada visita (SSR, ver astro.config.mjs:
+// output "server"). Netlify la sirve como función con caché de CDN
+// -ver el header Cache-Control más abajo- así que no golpea la API
+// de la ACA en cada clic, solo cuando la caché caduca.
+let embassaments = [];
+let resum = { volumTotal: 0, percentatgeMitja: null, dataMesRecent: null, capacitatMaxima: 700 };
+let comparatives = [];
+let errorCarrega = null;
+
+try {
+  embassaments = await fetchLiveData(fetch);
+  resum = calculaResum(embassaments);
+
+  if (resum.dataMesRecent) {
+    comparatives = await calculaComparatives(resum.dataMesRecent, resum.volumTotal, fetch);
+  }
+} catch (err) {
+  errorCarrega = err instanceof Error ? err.message : 'Error desconegut';
+}
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=1800'); // 30 min en CDN
+---
+<Layout>
+  <header class="wrap capçalera">
+    <p class="eyebrow mono">Conques internes · dades obertes ACA</p>
+    <h1>Estat dels embassaments de Catalunya</h1>
+    <p class="intro">
+      Nivell i evolució dels 10 embassaments de les conques internes,
+      actualitzats amb les dades diàries de l'Agència Catalana de l'Aigua.
+    </p>
+  </header>
+
+  <main class="wrap">
+    {errorCarrega ? (
+      <p class="error">No s'han pogut carregar les dades ({errorCarrega}). Torna-ho a provar d'aquí una estona.</p>
+    ) : (
+      <>
+        <Resum resum={resum} comparatives={comparatives} />
+
+        <div class="contour" aria-hidden="true"></div>
+
+        <div class="info-comparativa" id="info-comparativa" hidden>
+          <p class="info-comparativa-titol">comparativa de % embassat el dia <span id="info-comparativa-data"></span></p>
+          <div class="info-comparativa-llegenda">
+            <span class="mostra-linia" aria-hidden="true"></span>
+            <span>Nivell embassat comparat</span>
+          </div>
+        </div>
+
+        <section class="graella" aria-label="Embassaments individuals">
+          {embassaments.map((e) => <EmbassamentCard embassament={e} />)}
+        </section>
+
+        <div class="contour" aria-hidden="true"></div>
+
+        <section class="explicacio">
+          <h2>Com llegir aquestes dades</h2>
+          <dl>
+            <dt>Nivell absolut</dt>
+            <dd>Altitud de la superfície de l'aigua respecte al nivell del mar, en metres. No és la profunditat.</dd>
+            <dt>Volum embassat</dt>
+            <dd>Aigua acumulada, en hectòmetres cúbics (hm³). 1 hm³ equival a un milió de metres cúbics.</dd>
+            <dt>Percentatge de volum embassat</dt>
+            <dd>Quina part de la capacitat total de l'embassament està plena ara mateix.</dd>
+          </dl>
+        </section>
+      </>
+    )}
+  </main>
+
+  <footer class="wrap peu">
+    Dades obertes de <a href="https://analisi.transparenciacatalunya.cat/" target="_blank" rel="noopener">Analisi.Transparenciacatalunya.cat</a>
+  </footer>
+</Layout>
+
+<style>
+  .capçalera { padding: 56px 24px 32px; }
+  .eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--water-deep); margin: 0 0 8px; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+  .intro { max-width: 46em; color: var(--ink-soft); }
+
+  .info-comparativa {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    background: var(--surface-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.82rem;
+  }
+  .info-comparativa[hidden] { display: none; }
+  .info-comparativa-titol { margin: 0; }
+  .info-comparativa-llegenda {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-soft);
+  }
+  .mostra-linia {
+    display: inline-block;
+    width: 26px;
+    border-top: 2px dotted var(--negatiu);
+  }
+
+  .graella {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 720px) {
+    .graella { grid-template-columns: 1fr; }
+  }
+
+  .explicacio { max-width: 46em; margin-bottom: 64px; }
+  .explicacio dt { font-weight: 600; margin-top: 12px; }
+  .explicacio dd { margin: 2px 0 0; color: var(--ink-soft); }
+
+  .error {
+    background: var(--surface-card);
+    border: 1px solid var(--alert);
+    color: var(--alert);
+    padding: 16px;
+    border-radius: var(--radius);
+  }
+
+  .peu {
+    padding: 24px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+  }
+</style>
