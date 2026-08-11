@@ -116,5 +116,12 @@ export async function fetchVolumEnData(dataObjectiuISO, fetchFn = fetch) {
   const volumTotal = valors.reduce((acc, fila) => acc + (netejaNum(fila.volum_embassat) ?? 0), 0);
   const percentatgeMitja = valors.reduce((acc, fila) => acc + (netejaNum(fila.percentatge_volum_embassat) ?? 0), 0) / valors.length;
 
-  return { volumTotal, percentatgeMitja, embassamentsTrobats: valors.length };
+  // Desglossat per embassament, per poder marcar el nivell d'aquell dia
+  // a cada gràfica individual (no només el global).
+  const perEmbassament = EMBASSAMENTS.map((meta) => {
+    const fila = mesProperPerEmbassament.get(meta.estaci);
+    return fila ? { slug: meta.slug, percentatge: netejaNum(fila.percentatge_volum_embassat) } : null;
+  }).filter(Boolean);
+
+  return { volumTotal, percentatgeMitja, embassamentsTrobats: valors.length, perEmbassament };
 }

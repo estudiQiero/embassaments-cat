@@ -46,6 +46,14 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=1800');
 
         <div class="contour" aria-hidden="true"></div>
 
+        <div class="info-comparativa" id="info-comparativa" hidden>
+          <p class="info-comparativa-titol">comparativa de % embassat el dia <span id="info-comparativa-data"></span></p>
+          <div class="info-comparativa-llegenda">
+            <span class="mostra-linia" aria-hidden="true"></span>
+            <span>Nivell embassat comparat</span>
+          </div>
+        </div>
+
         <section class="graella" aria-label="Embassaments individuals">
           {embassaments.map((e) => <EmbassamentCard embassament={e} />)}
         </section>
@@ -77,6 +85,33 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=1800');
   .eyebrow { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--water-deep); margin: 0 0 8px; }
   h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
   .intro { max-width: 46em; color: var(--ink-soft); }
+
+  .info-comparativa {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    background: var(--surface-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.82rem;
+  }
+  .info-comparativa[hidden] { display: none; }
+  .info-comparativa-titol { margin: 0; }
+  .info-comparativa-llegenda {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-soft);
+  }
+  .mostra-linia {
+    display: inline-block;
+    width: 26px;
+    border-top: 2px dotted var(--negatiu);
+  }
 
   .graella {
     display: grid;

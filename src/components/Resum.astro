@@ -74,6 +74,8 @@ const { resum, comparatives } = Astro.props;
   const comparatAmb = document.getElementById('comparat-amb');
   const dataComparada = document.getElementById('data-comparada');
   const percentatgeHistoric = document.getElementById('percentatge-historic');
+  const infoComparativa = document.getElementById('info-comparativa');
+  const infoComparativaData = document.getElementById('info-comparativa-data');
 
   const avuiISO = input?.max || null;
   const volumAvui = parseFloat(input?.dataset.volumAvui ?? 'NaN');
@@ -111,6 +113,36 @@ const { resum, comparatives } = Astro.props;
     return `${dia}/${mes}/${any}`;
   }
 
+  // Marca, a la gràfica de cada embassament, el nivell que tenia el
+  // dia comparat (mateixa fórmula que fa servir NivellBar.astro per
+  // situar la làmina d'aigua dins del viewBox 0 0 120 96).
+  function actualitzaMarcadorsGrafica(perEmbassament) {
+    document.querySelectorAll('.nivell-bar').forEach((bar) => {
+      const marcador = bar.querySelector('.marcador-historic');
+      const dada = perEmbassament.find((e) => e.slug === bar.dataset.slug);
+      if (!marcador) return;
+      if (!dada || dada.percentatge === null) {
+        marcador.hidden = true;
+        return;
+      }
+      const pct = Math.max(0, Math.min(100, dada.percentatge));
+      const y = 90 - 84 * (pct / 100);
+      marcador.querySelector('.linia-historica')?.setAttribute('y1', y);
+      marcador.querySelector('.linia-historica')?.setAttribute('y2', y);
+      const text = marcador.querySelector('.text-historic');
+      if (text) {
+        text.setAttribute('y', y - 3);
+        text.textContent = `${pct.toFixed(1)}%`;
+      }
+      marcador.hidden = false;
+    });
+  }
+
+  function amagaMarcadorsGrafica() {
+    document.querySelectorAll('.marcador-historic').forEach((m) => { m.hidden = true; });
+    infoComparativa.hidden = true;
+  }
+
   btn?.addEventListener('click', () => {
     input.hidden = false;
     input.focus();
@@ -133,6 +165,7 @@ const { resum, comparatives } = Astro.props;
       comparatives.hidden = false;
       diferenciaHistorica.hidden = true;
       comparatAmb.hidden = true;
+      amagaMarcadorsGrafica();
       return;
     }
 
@@ -144,6 +177,7 @@ const { resum, comparatives } = Astro.props;
     percentatgeHistoric.textContent = '';
     dataComparada.textContent = formataData(dataSeleccionada);
     comparatAmb.hidden = false;
+    amagaMarcadorsGrafica();
 
     try {
       const dades = await fetchVolumEnData(dataSeleccionada);
@@ -151,6 +185,10 @@ const { resum, comparatives } = Astro.props;
         valorHistoric.textContent = 'Sense dades';
         return;
       }
+
+      infoComparativaData.textContent = formataData(dataSeleccionada);
+      infoComparativa.hidden = false;
+      actualitzaMarcadorsGrafica(dades.perEmbassament ?? []);
 
       // La comparació es fa respecte a avui: si el dia triat tenia més
       // aigua que avui, el resultat és negatiu (vermell, fletxa avall);

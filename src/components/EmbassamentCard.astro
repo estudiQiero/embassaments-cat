@@ -28,7 +28,7 @@ const imgSrc = embassament.imatge ? `/img/${embassament.imatge}` : null;
   <!-- Fila 4: dues columnes -->
   <div class="detall">
     <div class="col-grafica">
-      <NivellBar percentatge={embassament.percentatge} />
+      <NivellBar percentatge={embassament.percentatge} slug={embassament.slug} />
     </div>
     <div class="col-dades">
       <div class="dada">
