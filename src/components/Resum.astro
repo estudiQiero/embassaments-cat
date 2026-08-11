@@ -17,6 +17,7 @@ const { resum, comparatives } = Astro.props;
         <span class="mono" id="text-diferencia"></span>
       </p>
       <p class="sub">de {resum.capacitatMaxima} hm³ de capacitat</p>
+      <p class="sub" id="comparat-amb" hidden>comparat amb el dia <span id="data-comparada"></span></p>
 
       <hr class="separador" />
 
@@ -37,6 +38,7 @@ const { resum, comparatives } = Astro.props;
       <div class="fila-historica" id="fila-historica" hidden>
         <p id="label-historic">Volum total embassat —</p>
         <h3 class="mono" id="valor-historic">— hm³</h3>
+        <p class="sub" id="percentatge-historic"></p>
       </div>
     </div>
 
@@ -69,6 +71,9 @@ const { resum, comparatives } = Astro.props;
   const diferenciaHistorica = document.getElementById('diferencia-historica');
   const fletxaHistorica = document.getElementById('fletxa-historica');
   const textDiferencia = document.getElementById('text-diferencia');
+  const comparatAmb = document.getElementById('comparat-amb');
+  const dataComparada = document.getElementById('data-comparada');
+  const percentatgeHistoric = document.getElementById('percentatge-historic');
 
   const avuiISO = input?.max || null;
   const volumAvui = parseFloat(input?.dataset.volumAvui ?? 'NaN');
@@ -101,6 +106,11 @@ const { resum, comparatives } = Astro.props;
     return mesos === 0 ? `fa ${textAnys}` : `fa ${textAnys} i ${mesos} mes${mesos === 1 ? '' : 'os'}`;
   }
 
+  function formataData(dataISO) {
+    const [any, mes, dia] = dataISO.split('-');
+    return `${dia}/${mes}/${any}`;
+  }
+
   btn?.addEventListener('click', () => {
     input.hidden = false;
     input.focus();
@@ -122,6 +132,7 @@ const { resum, comparatives } = Astro.props;
       filaHistorica.hidden = true;
       comparatives.hidden = false;
       diferenciaHistorica.hidden = true;
+      comparatAmb.hidden = true;
       return;
     }
 
@@ -130,6 +141,9 @@ const { resum, comparatives } = Astro.props;
     diferenciaHistorica.hidden = true;
     labelHistoric.textContent = `Volum total embassat ${faTemps(dataSeleccionada, avuiISO)}`;
     valorHistoric.textContent = 'Carregant…';
+    percentatgeHistoric.textContent = '';
+    dataComparada.textContent = formataData(dataSeleccionada);
+    comparatAmb.hidden = false;
 
     try {
       const dades = await fetchVolumEnData(dataSeleccionada);
@@ -146,6 +160,7 @@ const { resum, comparatives } = Astro.props;
       const positiva = diffVol >= 0;
 
       valorHistoric.textContent = `${dades.volumTotal.toFixed(1)} hm³`;
+      percentatgeHistoric.textContent = `Llavors el percentatge mitjà era del ${dades.percentatgeMitja.toFixed(1)}%`;
 
       diferenciaHistorica.className = `diferencia-historica ${positiva ? 'positiu' : 'negatiu'}`;
       fletxaHistorica.innerHTML = fletxaSVG(positiva);
