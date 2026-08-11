@@ -12,11 +12,15 @@ const { resum, comparatives } = Astro.props;
     <div class="capsula capsula-volum">
       <p>Volum total embassat avui dia {resum.dataMesRecent ?? '—'}</p>
       <h3 class="mono">{resum.volumTotal.toFixed(1)} hm³</h3>
+      <p class="diferencia-historica" id="diferencia-historica" hidden>
+        <span class="fletxa" id="fletxa-historica"></span>
+        <span class="mono" id="text-diferencia"></span>
+      </p>
       <p class="sub">de {resum.capacitatMaxima} hm³ de capacitat</p>
 
       <hr class="separador" />
 
-      <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Consulta un altre dia…</button>
+      <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Compara amb un altre dia</button>
       <input
         type="date"
         id="input-data-historica"
@@ -29,12 +33,8 @@ const { resum, comparatives } = Astro.props;
       />
 
       <div class="fila-historica" id="fila-historica" hidden>
-        <p id="label-historic">Volum total embassat el dia —</p>
+        <p id="label-historic">Volum total embassat —</p>
         <h3 class="mono" id="valor-historic">— hm³</h3>
-        <p class="diferencia-historica" id="diferencia-historica" hidden>
-          <span class="fletxa" id="fletxa-historica"></span>
-          <span class="mono" id="text-diferencia"></span>
-        </p>
       </div>
     </div>
 
@@ -77,6 +77,28 @@ const { resum, comparatives } = Astro.props;
     return `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="${d}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" /></svg>`;
   }
 
+  // Expressa la distància entre dues dates ISO com "fa X dies/setmanes/mesos/anys".
+  function faTemps(dataISO, referenciaISO) {
+    const dies = Math.round((new Date(referenciaISO) - new Date(dataISO)) / 86400000);
+
+    if (dies <= 0) return 'avui';
+    if (dies === 1) return 'ahir';
+    if (dies < 14) return `fa ${dies} dies`;
+    if (dies < 60) {
+      const setmanes = Math.round(dies / 7);
+      return `fa ${setmanes} setmana${setmanes === 1 ? '' : 's'}`;
+    }
+    if (dies < 365) {
+      const mesos = Math.round(dies / 30.44);
+      return `fa ${mesos} mes${mesos === 1 ? '' : 'os'}`;
+    }
+
+    const anys = Math.floor(dies / 365.25);
+    const mesos = Math.round((dies - anys * 365.25) / 30.44);
+    const textAnys = `${anys} any${anys === 1 ? '' : 's'}`;
+    return mesos === 0 ? `fa ${textAnys}` : `fa ${textAnys} i ${mesos} mes${mesos === 1 ? '' : 'os'}`;
+  }
+
   btn?.addEventListener('click', () => {
     input.hidden = false;
     input.focus();
@@ -89,13 +111,14 @@ const { resum, comparatives } = Astro.props;
     if (!dataSeleccionada || dataSeleccionada === avuiISO) {
       filaHistorica.hidden = true;
       comparatives.hidden = false;
+      diferenciaHistorica.hidden = true;
       return;
     }
 
     comparatives.hidden = true;
     filaHistorica.hidden = false;
     diferenciaHistorica.hidden = true;
-    labelHistoric.textContent = `Volum total embassat el dia ${dataSeleccionada}`;
+    labelHistoric.textContent = `Volum total embassat ${faTemps(dataSeleccionada, avuiISO)}`;
     valorHistoric.textContent = 'Carregant…';
 
     try {
@@ -105,11 +128,11 @@ const { resum, comparatives } = Astro.props;
         return;
       }
 
-      // La comparació es fa respecte a la dada triada: si aquell dia
-      // hi havia menys aigua que avui, el resultat és negatiu (vermell,
-      // fletxa avall); si n'hi havia més, és positiu (verd, fletxa amunt).
-      const diffVol = dades.volumTotal - volumAvui;
-      const diffPct = dades.percentatgeMitja - percentatgeAvui;
+      // La comparació es fa respecte a avui: si el dia triat tenia més
+      // aigua que avui, el resultat és negatiu (vermell, fletxa avall);
+      // si en tenia menys, és positiu (verd, fletxa amunt).
+      const diffVol = volumAvui - dades.volumTotal;
+      const diffPct = percentatgeAvui - dades.percentatgeMitja;
       const positiva = diffVol >= 0;
 
       valorHistoric.textContent = `${dades.volumTotal.toFixed(1)} hm³`;
