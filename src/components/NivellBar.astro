@@ -18,15 +18,19 @@ const alturaAigua = 84 * (pct / 100);
 const yAigua = 90 - alturaAigua;
 const gradId = `aigua-grad-${Math.random().toString(36).slice(2, 9)}`;
 
+// Cantonades inferiors arrodonides, compartides pel contenidor i per
+// la làmina d'aigua (perquè l'aigua no sobresurti del got pel cantó).
+const r = 6;
+
 // Onatge molt subtil: la mateixa corba de la superfície oscil·lant
 // entre dues fases (cresta amunt / avall) per suggerir aigua viva,
-// sense que es noti com una animació brusca.
-const onadaA = `M1,${yAigua} Q30,${yAigua - 3} 60,${yAigua} T119,${yAigua} L119,92 L1,92 Z`;
-const onadaB = `M1,${yAigua} Q30,${yAigua + 3} 60,${yAigua} T119,${yAigua} L119,92 L1,92 Z`;
+// sense que es noti com una animació brusca. Els cantons de baix
+// segueixen el mateix arrodoniment que el contenidor.
+const onadaA = `M1,${yAigua} Q30,${yAigua - 3} 60,${yAigua} T119,${yAigua} L119,${92 - r} Q119,92 ${119 - r},92 L${1 + r},92 Q1,92 1,${92 - r} Z`;
+const onadaB = `M1,${yAigua} Q30,${yAigua + 3} 60,${yAigua} T119,${yAigua} L119,${92 - r} Q119,92 ${119 - r},92 L${1 + r},92 Q1,92 1,${92 - r} Z`;
 
 // Contorn amb cantonades inferiors lleugerament arrodonides (la part
 // de dalt queda oberta, com abans, per suggerir la superfície).
-const r = 6;
 const contenidor = `M1,4 L1,${92 - r} Q1,92 ${1 + r},92 L${119 - r},92 Q119,92 119,${92 - r} L119,4`;
 
 // El "tanc" es dibuixa en un sistema de coordenades local (0-120) que
@@ -44,13 +48,9 @@ const desplaçament = 25;
       </linearGradient>
     </defs>
     <g transform={`translate(${desplaçament} 0)`}>
-      <path d={contenidor} fill="none" stroke="var(--line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-      {[25, 50, 75].map((marca) => (
-        <>
-          <line x1="1" x2="9" y1={90 - 84 * (marca / 100)} y2={90 - 84 * (marca / 100)} stroke="var(--ink-soft)" stroke-width="2.5" stroke-linecap="round" opacity="0.55" />
-          <text x="-4" y={90 - 84 * (marca / 100) + 3} class="text-cota" text-anchor="end">{marca}%</text>
-        </>
-      ))}
+      <!-- L'aigua va primer, per darrere del contorn i les marques de
+           cota: així el got queda per davant del líquid, com un
+           recipient real, en lloc de tapar-lo. -->
       {percentatge !== null && (
         <path fill={`url(#${gradId})`} d={onadaA}>
           <animate
@@ -64,6 +64,13 @@ const desplaçament = 25;
           />
         </path>
       )}
+      <path d={contenidor} fill="none" stroke="var(--line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+      {[25, 50, 75].map((marca) => (
+        <>
+          <line x1="1" x2="9" y1={90 - 84 * (marca / 100)} y2={90 - 84 * (marca / 100)} stroke="var(--line)" stroke-width="2.5" stroke-linecap="round" />
+          <text x="-4" y={90 - 84 * (marca / 100) + 3} class="text-cota" text-anchor="end">{marca}%</text>
+        </>
+      ))}
       <g class="marcador-historic">
         <line x1="1" x2="119" y1="48" y2="48" class="linia-historica" />
         <text x="124" y="51" class="text-historic" text-anchor="start">—</text>

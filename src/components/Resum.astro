@@ -22,16 +22,16 @@ const { resum, comparatives } = Astro.props;
       <hr class="separador" />
 
       <div class="selector-dia">
-        <button type="button" id="btn-mostrar-dia" class="btn-mostrar-dia">Compara amb un altre dia</button>
+        <span class="btn-mostrar-dia" aria-hidden="true">Compara amb un altre dia</span>
         <input
           type="date"
           id="input-data-historica"
           class="input-data-historica"
+          aria-label="Compara amb un altre dia"
           max={resum.dataMesRecent ?? undefined}
           min="2000-01-01"
           data-volum-avui={resum.volumTotal}
           data-percentatge-avui={resum.percentatgeMitja ?? ''}
-          hidden
         />
       </div>
 
@@ -62,7 +62,6 @@ const { resum, comparatives } = Astro.props;
 <script>
   import { fetchVolumEnData } from '../lib/embassaments.js';
 
-  const btn = document.getElementById('btn-mostrar-dia');
   const input = document.getElementById('input-data-historica');
   const comparatives = document.getElementById('comparatives-relatives');
   const filaHistorica = document.getElementById('fila-historica');
@@ -143,30 +142,8 @@ const { resum, comparatives } = Astro.props;
     infoComparativa.hidden = true;
   }
 
-  btn?.addEventListener('click', () => {
-    input.hidden = false;
-    input.focus();
-    try {
-      if (typeof input.showPicker === 'function') input.showPicker();
-    } catch {
-      // El focus ja s'ha aplicat; en navegadors sense showPicker()
-      // l'usuari pot obrir el calendari igualment des del teclat.
-    }
-  });
-
-  // Si el navegador admet l'esdeveniment "cancel" (es dispara quan es
-  // tanca el calendari sense triar cap data), amaguem el camp perquè
-  // no quedi com una caixa buida. No fem servir "blur" per a això: en
-  // alguns navegadors el focus surt de l'input just en obrir-se el
-  // calendari natiu, i amagar-lo llavors tancava el selector abans de
-  // poder triar res.
-  input?.addEventListener('cancel', () => {
-    input.hidden = true;
-  });
-
   input?.addEventListener('change', async () => {
     const dataSeleccionada = input.value;
-    input.hidden = true;
 
     if (!dataSeleccionada || dataSeleccionada === avuiISO) {
       filaHistorica.hidden = true;
@@ -263,7 +240,12 @@ const { resum, comparatives } = Astro.props;
     border-top: 1px solid var(--line);
     margin: 16px 0;
   }
+  .selector-dia {
+    position: relative;
+    display: inline-block;
+  }
   .btn-mostrar-dia {
+    display: inline-block;
     font: inherit;
     font-size: 0.78rem;
     color: var(--water-deep);
@@ -271,21 +253,23 @@ const { resum, comparatives } = Astro.props;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 6px 12px;
+  }
+  .selector-dia:hover .btn-mostrar-dia { background: var(--surface-dim); }
+  /* L'input real ocupa tot l'espai del botó per sobre, transparent:
+     el clic sempre l'agafa el propi input, que obre el calendari amb
+     el comportament natiu del navegador (sense showPicker() ni focus()
+     via JS, que resultaven poc fiables entre navegadors). */
+  .input-data-historica {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
     cursor: pointer;
   }
-  .btn-mostrar-dia:hover { background: var(--surface-dim); }
-  .input-data-historica {
-    display: block;
-    font: inherit;
-    font-size: 0.85rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 5px 10px;
-    background: var(--surface-card);
-    color: var(--ink);
-    margin: 10px auto 0;
-  }
-  .input-data-historica[hidden] { display: none; }
 
   .fila-historica {
     margin-top: 16px;
