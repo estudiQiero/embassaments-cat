@@ -30,6 +30,7 @@ const { resum, comparatives } = Astro.props;
           min="2000-01-01"
           data-volum-avui={resum.volumTotal}
           data-percentatge-avui={resum.percentatgeMitja ?? ''}
+          hidden
         />
       </div>
 
@@ -87,7 +88,7 @@ const { resum, comparatives } = Astro.props;
     if (dies < 14) return `fa ${dies} dies`;
     if (dies < 60) {
       const setmanes = Math.round(dies / 7);
-      return `fa ${setmanes} setmana${setmanes === 1 ? '' : 's'}`;
+      return `fa ${setmanes} ${setmanes === 1 ? 'setmana' : 'setmanes'}`;
     }
     if (dies < 365) {
       const mesos = Math.round(dies / 30.44);
@@ -101,12 +102,21 @@ const { resum, comparatives } = Astro.props;
   }
 
   btn?.addEventListener('click', () => {
+    input.hidden = false;
+    input.focus();
     if (typeof input.showPicker === 'function') input.showPicker();
-    else input.focus();
+  });
+
+  // Si l'usuari obre el calendari i no arriba a triar cap data, el
+  // camp torna a amagar-se en perdre el focus perquè no quedi com una
+  // caixa buida al costat del botó.
+  input?.addEventListener('blur', () => {
+    input.hidden = true;
   });
 
   input?.addEventListener('change', async () => {
     const dataSeleccionada = input.value;
+    input.hidden = true;
 
     if (!dataSeleccionada || dataSeleccionada === avuiISO) {
       filaHistorica.hidden = true;
@@ -192,9 +202,6 @@ const { resum, comparatives } = Astro.props;
     border-top: 1px solid var(--line);
     margin: 16px 0;
   }
-  .selector-dia {
-    position: relative;
-  }
   .btn-mostrar-dia {
     font: inherit;
     font-size: 0.78rem;
@@ -206,17 +213,18 @@ const { resum, comparatives } = Astro.props;
     cursor: pointer;
   }
   .btn-mostrar-dia:hover { background: var(--surface-dim); }
-  /* Input real per obrir el selector natiu, però invisible: la
-     "caixa" que es veu és el botó, no un camp buit. */
   .input-data-historica {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
+    display: block;
+    font: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 5px 10px;
+    background: var(--surface-card);
+    color: var(--ink);
+    margin: 10px auto 0;
   }
+  .input-data-historica[hidden] { display: none; }
 
   .fila-historica {
     margin-top: 16px;
