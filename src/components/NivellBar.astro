@@ -28,35 +28,46 @@ const onadaB = `M1,${yAigua} Q30,${yAigua + 3} 60,${yAigua} T119,${yAigua} L119,
 // de dalt queda oberta, com abans, per suggerir la superfície).
 const r = 6;
 const contenidor = `M1,4 L1,${92 - r} Q1,92 ${1 + r},92 L${119 - r},92 Q119,92 119,${92 - r} L119,4`;
+
+// El "tanc" es dibuixa en un sistema de coordenades local (0-120) que
+// es desplaça dins d'un viewBox més ample, per deixar marge fora del
+// contenidor: a l'esquerra per als percentatges de les marques de
+// cota, i a la dreta per al percentatge de la comparativa històrica.
+const desplaçament = 25;
 ---
 <div class="nivell-bar" data-slug={slug} role="img" aria-label={percentatge === null ? 'Nivell no disponible' : `Nivell al ${pct.toFixed(1)}%`}>
-  <svg viewBox="0 0 120 96" preserveAspectRatio="none">
+  <svg viewBox={`0 0 ${120 + desplaçament + 34} 96`} preserveAspectRatio="none">
     <defs>
       <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color={color} stop-opacity="1" />
         <stop offset="100%" stop-color={color} stop-opacity="0.35" />
       </linearGradient>
     </defs>
-    <path d={contenidor} fill="none" stroke="var(--water-outline)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    {[25, 50, 75].map((marca) => (
-      <line x1="1" x2="9" y1={90 - 84 * (marca / 100)} y2={90 - 84 * (marca / 100)} stroke="var(--water-outline)" stroke-width="2.5" stroke-linecap="round" opacity="0.9" />
-    ))}
-    {percentatge !== null && (
-      <path fill={`url(#${gradId})`} d={onadaA}>
-        <animate
-          attributeName="d"
-          dur="5s"
-          repeatCount="indefinite"
-          calcMode="spline"
-          keyTimes="0; 0.5; 1"
-          keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"
-          values={`${onadaA}; ${onadaB}; ${onadaA}`}
-        />
-      </path>
-    )}
-    <g class="marcador-historic" hidden>
-      <line x1="1" x2="119" y1="48" y2="48" class="linia-historica" />
-      <text x="118" y="45" class="text-historic" text-anchor="end">—</text>
+    <g transform={`translate(${desplaçament} 0)`}>
+      <path d={contenidor} fill="none" stroke="var(--line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+      {[25, 50, 75].map((marca) => (
+        <>
+          <line x1="1" x2="9" y1={90 - 84 * (marca / 100)} y2={90 - 84 * (marca / 100)} stroke="var(--ink-soft)" stroke-width="2.5" stroke-linecap="round" opacity="0.55" />
+          <text x="-4" y={90 - 84 * (marca / 100) + 3} class="text-cota" text-anchor="end">{marca}%</text>
+        </>
+      ))}
+      {percentatge !== null && (
+        <path fill={`url(#${gradId})`} d={onadaA}>
+          <animate
+            attributeName="d"
+            dur="5s"
+            repeatCount="indefinite"
+            calcMode="spline"
+            keyTimes="0; 0.5; 1"
+            keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"
+            values={`${onadaA}; ${onadaB}; ${onadaA}`}
+          />
+        </path>
+      )}
+      <g class="marcador-historic">
+        <line x1="1" x2="119" y1="48" y2="48" class="linia-historica" />
+        <text x="124" y="51" class="text-historic" text-anchor="start">—</text>
+      </g>
     </g>
   </svg>
   <span class="valor mono" style={`color:${color}`}>
@@ -66,7 +77,7 @@ const contenidor = `M1,4 L1,${92 - r} Q1,92 ${1 + r},92 L${119 - r},92 Q119,92 1
 
 <style>
   .nivell-bar {
-    width: 50%;
+    width: 70%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -77,6 +88,17 @@ const contenidor = `M1,4 L1,${92 - r} Q1,92 ${1 + r},92 L${119 - r},92 Q119,92 1
   .valor {
     font-size: 1.6rem;
     font-weight: 500;
+  }
+  .text-cota {
+    fill: var(--water-deep);
+    font-family: var(--font-body);
+    font-size: 9px;
+  }
+  .marcador-historic {
+    display: none;
+  }
+  .marcador-historic.visible {
+    display: block;
   }
   .linia-historica {
     stroke: var(--negatiu);
